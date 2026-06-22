@@ -277,6 +277,47 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(summary["coredump_state"], "saved")
         self.assertNotIn("NetApp panic panic_string", result["kb"]["queries"])
 
+    def test_run_manual_can_add_telegram_notification_preview(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rules = root / "rules"
+            rules.mkdir()
+            (rules / "Rules.csv").write_text(
+                "rule_id,enabled,priority,subject_contains,header_trigger,alert_type,parser,question_direction\n"
+                "node_panic_takeover_complete,TRUE,110,CONTROLLER TAKEOVER COMPLETE PANIC,,node_panic,panic,Confirm node panic and takeover evidence\n",
+                encoding="utf-8",
+            )
+            (rules / "EvidenceFiles.csv").write_text(
+                "rule_id,file_glob,priority,purpose,patterns\n",
+                encoding="utf-8",
+            )
+            (rules / "KBQueries.csv").write_text(
+                "rule_id,condition,query_template\n",
+                encoding="utf-8",
+            )
+            archive_path = root / "panic.zip"
+            with zipfile.ZipFile(archive_path, "w"):
+                pass
+
+            with patch.dict("os.environ", {"AI_PROVIDER_API_KEY": "", "AI_PROVIDER_MODEL": ""}):
+                result = run_manual(
+                    subject="[外部] HA Group Notification from nbt1-11 (CONTROLLER TAKEOVER COMPLETE PANIC) EMERGENCY",
+                    attachment_path=archive_path,
+                    registry_dir=rules,
+                    ai_config={},
+                    from_address="autosupport@mail.realtek.com",
+                    body_text="GENERATED_ON=Mon Jun 22 10:23:43 +0800 2026\nHOSTNAME=nbt1-11\n",
+                    telegram_preview=True,
+                )
+
+        self.assertEqual(result["message"]["from"], "autosupport@mail.realtek.com")
+        self.assertEqual(result["asup_metadata"]["generated_on"], "Mon Jun 22 10:23:43 +0800 2026")
+        self.assertEqual(result["asup_metadata"]["hostname"], "nbt1-11")
+        self.assertEqual(result["notification"]["customer"], "RTK")
+        self.assertEqual(result["notification"]["priority"], "P1")
+        self.assertTrue(result["notification"]["should_send"])
+        self.assertIn("[NetApp ASUP] RTK - P1", result["notification"]["telegram_text"])
+
 
 if __name__ == "__main__":
     unittest.main()

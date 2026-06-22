@@ -61,6 +61,12 @@ flowchart TD
     Z --> Z4[analysis]
     Z --> Z5[kb]
     Z --> Z6[warnings / errors]
+    Z --> AA{Telegram preview requested}
+    AA -->|是| AB[解析 ASUP 郵件 body metadata]
+    AA -->|否| AC[只輸出分析 JSON]
+    AB --> AD[依寄件 domain 分類客戶]
+    AD --> AE[依主旨分類 P1 / P2 / no-send]
+    AE --> AF[產生 notification.telegram_text]
 ```
 
 ## English Workflow
@@ -124,4 +130,10 @@ flowchart TD
     Z --> Z4[analysis]
     Z --> Z5[kb]
     Z --> Z6[warnings / errors]
+    Z --> AA{Telegram preview requested}
+    AA -->|Yes| AB[Parse ASUP email body metadata]
+    AA -->|No| AC[Return analysis JSON only]
+    AB --> AD[Classify customer by sender domain]
+    AD --> AE[Classify subject as P1 / P2 / no-send]
+    AE --> AF[Build notification.telegram_text]
 ```

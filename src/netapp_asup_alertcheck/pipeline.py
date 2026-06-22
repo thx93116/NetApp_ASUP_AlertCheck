@@ -8,6 +8,8 @@ from typing import Any
 from .ai import build_messages, call_openai_compatible
 from .archive import ArchiveReader
 from .classifier import classify_message
+from .email_body import parse_asup_body
+from .formatters.telegram import build_notification
 from .kb import build_kb_queries
 from .models import AnalysisResult, EmailMessageInput, EvidenceBundle, KBQueryRule, OutputEnvelope
 from .parsers.arw import parse_arw_evidence
@@ -76,10 +78,14 @@ def run_manual(
     registry_dir: str | Path | None = "data/rules",
     ai_config: dict[str, str] | None = None,
     registry_urls: dict[str, str] | None = None,
+    from_address: str | None = None,
+    body_text: str | None = None,
+    telegram_preview: bool = False,
 ) -> dict[str, Any]:
     warnings: list[str] = []
     errors: list[str] = []
     ai_config = ai_config or {}
+    asup_metadata = parse_asup_body(body_text or "")
 
     registry = _load_registry_source(registry_dir, registry_urls)
     warnings.extend(registry.warnings)
@@ -136,7 +142,7 @@ def run_manual(
     envelope = OutputEnvelope(
         message=EmailMessageInput(
             received_at=None,
-            from_address=None,
+            from_address=from_address,
             subject=subject,
             headers=headers,
             attachments=[str(attachment_path)],
@@ -148,4 +154,13 @@ def run_manual(
         warnings=warnings,
         errors=errors,
     )
-    return envelope.to_dict()
+    result = envelope.to_dict()
+    if asup_metadata:
+        result["asup_metadata"] = asup_metadata
+    if telegram_preview or from_address or asup_metadata:
+        result["notification"] = build_notification(
+            result,
+            from_address=from_address,
+            asup_metadata=asup_metadata,
+        )
+    return result

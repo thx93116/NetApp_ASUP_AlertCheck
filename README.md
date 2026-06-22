@@ -14,6 +14,7 @@ Workflow 流程圖：[`docs/workflow.md`](docs/workflow.md)
 - 從本機 CSV 或 Google Sheet CSV URL 載入規則表
 - 讀取 `.7z`、`.zip`、`.tar`、`.tgz`、`.gz` 附件
 - 解析 ARW / ransomware 相關 AutoSupport 證據
+- 依寄件 domain、主旨 P1/P2 規則、ASUP body `GENERATED_ON` 產生 Telegram 預覽訊息
 - 使用 OpenAI-compatible 第三方 AI provider 做最終判斷
 - AI key 尚未提供時，仍回傳 deterministic evidence 與 `ai_not_run`
 
@@ -27,6 +28,31 @@ PYTHONPATH=src python -m netapp_asup_alertcheck.cli manual \
 ```
 
 `.7z` 需要系統 PATH 裡有 `7z` CLI。
+
+### Telegram 預覽
+
+目前只產生預覽文字，不會真的發送 Telegram。先把 ASUP 郵件內容存成文字檔，例如 `asup/mail-body.txt`：
+
+```text
+GENERATED_ON=Mon Jun 22 13:25:32 +0800 2026
+VERSION=NetApp Release 9.16.1P11: Thu Jan 15 06:21:38 EST 2026
+HOSTNAME=nbt1-12
+PARTNER_HOSTNAME=nbt1-11
+```
+
+執行：
+
+```bash
+PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 python -m netapp_asup_alertcheck.cli manual \
+  --subject "[❗️外部❗️] HA Group Notification from nbt1-11 (CONTROLLER TAKEOVER COMPLETE PANIC) EMERGENCY" \
+  --attachment "asup/body_CONTROLLER TAKEOVER COMPLETE PANIC.7z" \
+  --registry-dir data/rules \
+  --from-address "autosupport@mail.realtek.com" \
+  --body-file "asup/mail-body.txt" \
+  --telegram-preview
+```
+
+輸出會多出 `asup_metadata` 與 `notification`。其中 `notification.should_send` 代表未來是否要發 Telegram，`REBOOT (power on)` 會是 `false`。
 
 ### 使用 Google Sheet / CSV URL
 
@@ -134,6 +160,22 @@ export AI_PROVIDER_MODEL="..."
 
 Provider secrets are runtime configuration only. Do not commit real API keys.
 The default base URL in code is already `http://127.0.0.1:8000/v1`; you only need to override it if the provider endpoint changes.
+
+## Telegram Preview
+
+Manual mode can build a Telegram notification preview without sending anything:
+
+```bash
+PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 python -m netapp_asup_alertcheck.cli manual \
+  --subject "[External] HA Group Notification from nbt1-11 (CONTROLLER TAKEOVER COMPLETE PANIC) EMERGENCY" \
+  --attachment "asup/body_CONTROLLER TAKEOVER COMPLETE PANIC.7z" \
+  --registry-dir data/rules \
+  --from-address "autosupport@mail.realtek.com" \
+  --body-file "asup/mail-body.txt" \
+  --telegram-preview
+```
+
+The output includes `asup_metadata` and `notification`. `REBOOT (power on)` is classified as no-send for notification preview.
 
 ## Rule Registry
 

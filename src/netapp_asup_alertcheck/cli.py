@@ -18,6 +18,13 @@ def build_parser() -> argparse.ArgumentParser:
     manual.add_argument("--rules-url")
     manual.add_argument("--evidence-url")
     manual.add_argument("--kb-url")
+    manual.add_argument("--from-address")
+    manual.add_argument("--body-file")
+    manual.add_argument(
+        "--telegram-preview",
+        action="store_true",
+        help="Include notification preview JSON without sending Telegram messages",
+    )
     return parser
 
 
@@ -35,11 +42,17 @@ def main(argv: list[str] | None = None) -> int:
                 "evidence": args.evidence_url,
                 "kb": args.kb_url,
             }
+        body_text = None
+        if args.body_file:
+            body_text = Path(args.body_file).read_text(encoding="utf-8")
         result = run_manual(
             subject=args.subject,
             attachment_path=Path(args.attachment),
             registry_dir=None if registry_urls else Path(args.registry_dir),
             registry_urls=registry_urls,
+            from_address=args.from_address,
+            body_text=body_text,
+            telegram_preview=args.telegram_preview,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
         return 1 if result.get("errors") else 0
