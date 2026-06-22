@@ -1,3 +1,7 @@
 rule_id,condition,query_template
 arw_activity_seen,ai_requests_kb,NetApp {header_trigger}
 arw_activity_seen,low_confidence,NetApp ARW {attack_detected_by}
+node_panic_takeover_complete,ai_requests_kb,NetApp CONTROLLER TAKEOVER COMPLETE PANIC {ontap_version}
+node_panic_takeover_complete,low_confidence,NetApp ONTAP panic coredump takeover {model}
+node_panic_partner_reboot,ai_requests_kb,NetApp PARTNER REBOOT CONTROLLER TAKEOVER ON PANIC {ontap_version}
+node_panic_partner_reboot,low_confidence,NetApp ONTAP partner reboot takeover panic {model}

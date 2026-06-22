@@ -4,3 +4,13 @@ arw_activity_seen,EMS-LOG-FILE.gz,20,Callhome trigger and affected object,callho
 arw_activity_seen,arw-vol-status.xml,30,"ARW state, probability, timeline",
 arw_activity_seen,arw-high-entropy-stats.xml,40,High entropy spike evidence,
 arw_activity_seen,arw-daily-entropy-stats.xml,50,Baseline comparison,
+node_panic_takeover_complete,X-HEADER-DATA.TXT,10,AutoSupport metadata,
+node_panic_takeover_complete,coredump-status.xml,20,Coredump status,
+node_panic_takeover_complete,panic-context.xml,30,Panic context and stack/EMS context,"panic,takeover,failover,reboot,coredump"
+node_panic_takeover_complete,EMS-LOG-FILE.gz,40,EMS panic and takeover events,"panic,takeover,failover,reboot,coredump"
+node_panic_takeover_complete,messages.log.gz,50,System log excerpts,"panic,takeover,failover,reboot,coredump"
+node_panic_partner_reboot,X-HEADER-DATA.TXT,10,AutoSupport metadata,
+node_panic_partner_reboot,coredump-status.xml,20,Coredump status,
+node_panic_partner_reboot,panic-context.xml,30,Panic context and stack/EMS context,"panic,takeover,failover,reboot,coredump"
+node_panic_partner_reboot,EMS-LOG-FILE.gz,40,EMS panic and takeover events,"panic,takeover,failover,reboot,coredump"
+node_panic_partner_reboot,messages.log.gz,50,System log excerpts,"panic,takeover,failover,reboot,coredump"

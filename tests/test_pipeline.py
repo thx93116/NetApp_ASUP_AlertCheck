@@ -155,6 +155,65 @@ class PipelineTests(unittest.TestCase):
         )
         self.assertEqual(result["classification"]["matched_rule_id"], "arw_activity_seen")
 
+    def test_run_manual_returns_node_panic_evidence_without_ai_key(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rules = root / "rules"
+            rules.mkdir()
+            (rules / "Rules.csv").write_text(
+                "rule_id,enabled,priority,subject_contains,header_trigger,alert_type,parser,question_direction\n"
+                "node_panic_takeover_complete,TRUE,110,CONTROLLER TAKEOVER COMPLETE PANIC,,node_panic,panic,Confirm node panic and takeover evidence\n",
+                encoding="utf-8",
+            )
+            (rules / "EvidenceFiles.csv").write_text(
+                "rule_id,file_glob,priority,purpose,patterns\n"
+                "node_panic_takeover_complete,X-HEADER-DATA.TXT,10,ASUP headers,\n"
+                "node_panic_takeover_complete,coredump-status.xml,20,Coredump status,\n"
+                "node_panic_takeover_complete,panic-context.xml,30,Panic context,\n"
+                "node_panic_takeover_complete,EMS-LOG-FILE.gz,40,EMS panic and takeover events,\n",
+                encoding="utf-8",
+            )
+            (rules / "KBQueries.csv").write_text(
+                "rule_id,condition,query_template\n"
+                "node_panic_takeover_complete,ai_requests_kb,NetApp {header_trigger} {ontap_version}\n",
+                encoding="utf-8",
+            )
+            archive_path = root / "panic.zip"
+            with zipfile.ZipFile(archive_path, "w") as archive:
+                archive.writestr(
+                    "X-HEADER-DATA.TXT",
+                    "X-Netapp-asup-hostname: nbt1-11\n"
+                    "X-Netapp-asup-partner-hostname: nbt1-12\n"
+                    "X-Netapp-asup-cluster-name: nbt1\n"
+                    "X-Netapp-asup-os-version: NetApp Release 9.16.1P11\n",
+                )
+                archive.writestr(
+                    "coredump-status.xml",
+                    "<root><ROW><node>nbt1-11</node><state>saving</state>"
+                    "<corename>core.123</corename><coredump_type>kernel</coredump_type></ROW></root>",
+                )
+                archive.writestr(
+                    "panic-context.xml",
+                    "<root><ROW><time>6/22/2026 10:21:52</time><severity>EMERGENCY</severity>"
+                    "<source>panic</source><messagename>callhome.panic</messagename>"
+                    "<parameters><list><li>panic_string: page fault</li></list></parameters></ROW></root>",
+                )
+                archive.writestr("EMS-LOG-FILE.gz", "PANIC: page fault\nFAILOVER: TakeOver complete\n")
+
+            result = run_manual(
+                subject="[外部] HA Group Notification from nbt1-11 (CONTROLLER TAKEOVER COMPLETE PANIC) EMERGENCY",
+                attachment_path=archive_path,
+                registry_dir=rules,
+                ai_config={},
+            )
+
+        summary = {item["name"]: item["value"] for item in result["evidence"]["summary"]}
+        self.assertEqual(result["classification"]["matched_rule_id"], "node_panic_takeover_complete")
+        self.assertEqual(result["classification"]["parser"], "panic")
+        self.assertEqual(summary["node"], "nbt1-11")
+        self.assertEqual(summary["coredump_state"], "saving")
+        self.assertEqual(summary["panic_event"]["message_name"], "callhome.panic")
+
 
 if __name__ == "__main__":
     unittest.main()

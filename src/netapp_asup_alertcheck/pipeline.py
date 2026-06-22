@@ -11,6 +11,7 @@ from .classifier import classify_message
 from .kb import build_kb_queries
 from .models import AnalysisResult, EmailMessageInput, EvidenceBundle, OutputEnvelope
 from .parsers.arw import parse_arw_evidence
+from .parsers.panic import parse_panic_evidence
 from .registry import RuleRegistry, load_registry_from_dir, load_registry_from_urls
 
 
@@ -88,6 +89,8 @@ def run_manual(
 
     if classification.parser == "arw":
         evidence = parse_arw_evidence(files)
+    elif classification.parser == "panic":
+        evidence = parse_panic_evidence(files)
     else:
         evidence = EvidenceBundle(summary=[], files_used=[], raw_refs=[])
 

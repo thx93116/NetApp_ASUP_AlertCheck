@@ -78,6 +78,14 @@ API key 只放 runtime env，不寫入程式碼或規則表。
 - parser：`arw`
 - 優先讀取：`X-HEADER-DATA.TXT`、`EMS-LOG-FILE.gz`、`arw-vol-status.xml`、`arw-high-entropy-stats.xml`、`arw-daily-entropy-stats.xml`
 - KB query：`NetApp {header_trigger}`、`NetApp ARW {attack_detected_by}`
+- `node_panic_takeover_complete`
+- 主旨包含：`CONTROLLER TAKEOVER COMPLETE PANIC`
+- parser：`panic`
+- 優先讀取：`X-HEADER-DATA.TXT`、`coredump-status.xml`、`panic-context.xml`、`EMS-LOG-FILE.gz`、`messages.log.gz`
+- `node_panic_partner_reboot`
+- 主旨包含：`PARTNER REBOOT (CONTROLLER TAKEOVER ON PANIC)`
+- parser：`panic`
+- 優先讀取：`X-HEADER-DATA.TXT`、`coredump-status.xml`、`panic-context.xml`、`EMS-LOG-FILE.gz`、`messages.log.gz`
 
 ### 測試
 
@@ -138,12 +146,16 @@ Suggested Google Sheet tabs:
 | `EvidenceFiles` | `rule_id`, `file_glob`, `priority`, `purpose`, `patterns` |
 | `KBQueries` | `rule_id`, `condition`, `query_template` |
 
-Current seed rule:
+Current seed rules:
 
 - `arw_activity_seen`: subject contains `POSSIBLE RANSOMWARE ACTIVITY DETECTED`
 - parser: `arw`
 - evidence priority: `X-HEADER-DATA.TXT`, `EMS-LOG-FILE.gz`, `arw-vol-status.xml`, `arw-high-entropy-stats.xml`, `arw-daily-entropy-stats.xml`
 - KB query templates: `NetApp {header_trigger}`, `NetApp ARW {attack_detected_by}`
+- `node_panic_takeover_complete`: subject contains `CONTROLLER TAKEOVER COMPLETE PANIC`
+- `node_panic_partner_reboot`: subject contains `PARTNER REBOOT (CONTROLLER TAKEOVER ON PANIC)`
+- parser: `panic`
+- evidence priority: `X-HEADER-DATA.TXT`, `coredump-status.xml`, `panic-context.xml`, `EMS-LOG-FILE.gz`, `messages.log.gz`
 
 ## Tests
 
