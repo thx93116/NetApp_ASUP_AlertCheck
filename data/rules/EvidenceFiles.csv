@@ -1,0 +1,6 @@
+rule_id,file_glob,priority,purpose,patterns
+arw_activity_seen,X-HEADER-DATA.TXT,10,AutoSupport metadata,
+arw_activity_seen,EMS-LOG-FILE.gz,20,Callhome trigger and affected object,callhome_arw_activity_seen
+arw_activity_seen,arw-vol-status.xml,30,"ARW state, probability, timeline",
+arw_activity_seen,arw-high-entropy-stats.xml,40,High entropy spike evidence,
+arw_activity_seen,arw-daily-entropy-stats.xml,50,Baseline comparison,

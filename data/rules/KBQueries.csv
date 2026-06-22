@@ -1,0 +1,3 @@
+rule_id,condition,query_template
+arw_activity_seen,ai_requests_kb,NetApp {header_trigger}
+arw_activity_seen,low_confidence,NetApp ARW {attack_detected_by}

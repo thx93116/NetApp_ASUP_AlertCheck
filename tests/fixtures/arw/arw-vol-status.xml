@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<T_ARW_VOL_STATUS>
+  <asup:ROW xmlns:asup="http://asup_search.netapp.com/ns/ASUP/1.1">
+    <arw_vserver>ISCSI-SVM</arw_vserver>
+    <arw_volume>Netapp_A20_LUN00</arw_volume>
+    <arw_state>enabled</arw_state>
+    <attack_probability>moderate</attack_probability>
+    <attack_timeline><asup:list><asup:li>6/12/2026 17:53:41</asup:li></asup:list></attack_timeline>
+    <attack_detected_by>encryption_percentage_analysis</attack_detected_by>
+  </asup:ROW>
+</T_ARW_VOL_STATUS>

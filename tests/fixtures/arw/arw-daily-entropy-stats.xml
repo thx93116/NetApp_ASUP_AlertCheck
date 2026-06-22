@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<T_ARW_DAILY_ENTROPY_STAT>
+  <asup:ROW xmlns:asup="http://asup_search.netapp.com/ns/ASUP/1.1">
+    <arw_vserver>ISCSI-SVM</arw_vserver>
+    <arw_volume>Netapp_A20_LUN00</arw_volume>
+    <start_time>6/10/2026 18:23:41</start_time>
+    <total_data_written>846912970752</total_data_written>
+    <encryption_percentage>1%</encryption_percentage>
+    <duration_of_the_interval>23h0m0s</duration_of_the_interval>
+  </asup:ROW>
+  <asup:ROW xmlns:asup="http://asup_search.netapp.com/ns/ASUP/1.1">
+    <arw_vserver>ISCSI-SVM</arw_vserver>
+    <arw_volume>Netapp_A20_LUN00</arw_volume>
+    <start_time>6/12/2026 16:23:41</start_time>
+    <total_data_written>778404864000</total_data_written>
+    <encryption_percentage>7%</encryption_percentage>
+    <duration_of_the_interval>23h0m0s</duration_of_the_interval>
+  </asup:ROW>
+</T_ARW_DAILY_ENTROPY_STAT>

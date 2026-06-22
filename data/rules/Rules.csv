@@ -1,0 +1,2 @@
+rule_id,enabled,priority,subject_contains,header_trigger,alert_type,parser,question_direction
+arw_activity_seen,TRUE,100,POSSIBLE RANSOMWARE ACTIVITY DETECTED,callhome.arw.activity.seen,ransomware,arw,"Confirm whether ARW detected possible ransomware activity, affected SVM/volume, probability, time, detection reason, and entropy evidence."
