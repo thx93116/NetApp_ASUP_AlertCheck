@@ -53,6 +53,7 @@ class PanicParserTests(unittest.TestCase):
         self.assertEqual(summary["coredump_state"], "saving")
         self.assertEqual(summary["coredump_name"], "core.123")
         self.assertEqual(summary["panic_event"]["message_name"], "callhome.panic")
+        self.assertEqual(summary["panic_string"], "page fault")
         self.assertTrue(any(ref["file"] == "EMS-LOG-FILE.gz" for ref in bundle.raw_refs))
 
     def test_parse_panic_evidence_handles_missing_files(self):

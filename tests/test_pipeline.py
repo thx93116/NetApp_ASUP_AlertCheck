@@ -175,7 +175,8 @@ class PipelineTests(unittest.TestCase):
             )
             (rules / "KBQueries.csv").write_text(
                 "rule_id,condition,query_template\n"
-                "node_panic_takeover_complete,ai_requests_kb,NetApp {header_trigger} {ontap_version}\n",
+                "node_panic_takeover_complete,ai_requests_kb,NetApp {header_trigger} {ontap_version}\n"
+                "node_panic_takeover_complete,panic_string,NetApp panic {panic_string}\n",
                 encoding="utf-8",
             )
             archive_path = root / "panic.zip"
@@ -213,6 +214,8 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(summary["node"], "nbt1-11")
         self.assertEqual(summary["coredump_state"], "saving")
         self.assertEqual(summary["panic_event"]["message_name"], "callhome.panic")
+        self.assertEqual(summary["panic_string"], "page fault")
+        self.assertIn("NetApp panic page fault", result["kb"]["queries"])
 
     def test_run_manual_returns_power_on_reboot_evidence_without_ai_key(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -233,7 +236,8 @@ class PipelineTests(unittest.TestCase):
             )
             (rules / "KBQueries.csv").write_text(
                 "rule_id,condition,query_template\n"
-                "node_reboot_power_on,ai_requests_kb,NetApp REBOOT power on {ontap_version}\n",
+                "node_reboot_power_on,ai_requests_kb,NetApp REBOOT power on {ontap_version}\n"
+                "node_reboot_power_on,panic_string,NetApp panic {panic_string}\n",
                 encoding="utf-8",
             )
             archive_path = root / "reboot.zip"
@@ -271,6 +275,7 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(summary["node"], "nbt1-12")
         self.assertEqual(summary["partner_node"], "nbt1-11")
         self.assertEqual(summary["coredump_state"], "saved")
+        self.assertNotIn("NetApp panic panic_string", result["kb"]["queries"])
 
 
 if __name__ == "__main__":

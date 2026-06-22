@@ -18,6 +18,12 @@ class SeedRuleTests(unittest.TestCase):
         self.assertEqual(rules["node_reboot_power_on"].parser, "panic")
         self.assertIn("node_reboot_power_on", registry.evidence_files)
         self.assertIn("node_reboot_power_on", registry.kb_queries)
+        self.assertTrue(
+            any(rule.condition == "panic_string" for rule in registry.kb_queries["node_reboot_power_on"])
+        )
+        self.assertTrue(
+            any(rule.condition == "panic_string" for rule in registry.kb_queries["node_panic_takeover_complete"])
+        )
 
 
 if __name__ == "__main__":

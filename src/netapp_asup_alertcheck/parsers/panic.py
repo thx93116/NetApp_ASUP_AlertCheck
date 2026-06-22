@@ -10,6 +10,7 @@ DOCTYPE_INTERNAL_RE = re.compile(r"<!DOCTYPE\s+[^[]+\[[\s\S]*?\]>\s*", re.IGNORE
 DOCTYPE_SIMPLE_RE = re.compile(r"<!DOCTYPE\s+[^>]*>\s*", re.IGNORECASE)
 UNSAFE_XML_RE = re.compile(r"<!ENTITY|<!DOCTYPE\s+[^>]*(?:SYSTEM|PUBLIC)", re.IGNORECASE)
 RELEVANT_LOG_RE = re.compile(r"\b(panic|takeover|failover|reboot|coredump|core)\b", re.IGNORECASE)
+PANIC_STRING_RE = re.compile(r"(?:panic[_ -]?string|panic):\s*(.+)", re.IGNORECASE)
 
 
 HEADER_SUMMARY_FIELDS = {
@@ -109,6 +110,30 @@ def _parse_panic_event(xml_text: str) -> dict[str, object]:
     return {}
 
 
+def _panic_string_from_event(event: dict[str, object]) -> str:
+    parameters = event.get("parameters", [])
+    if not isinstance(parameters, list):
+        return ""
+    for parameter in parameters:
+        if not isinstance(parameter, str):
+            continue
+        match = PANIC_STRING_RE.search(parameter)
+        if match:
+            return match.group(1).strip()
+    return ""
+
+
+def _panic_string_from_logs(files: dict[str, str]) -> str:
+    for file_name, text in files.items():
+        if not (file_name.endswith(".gz") or "LOG" in file_name.upper() or "log" in file_name.lower()):
+            continue
+        for line in text.splitlines():
+            match = PANIC_STRING_RE.search(line)
+            if match:
+                return match.group(1).strip()
+    return ""
+
+
 def _log_refs(files: dict[str, str]) -> list[dict[str, object]]:
     refs: list[dict[str, object]] = []
     for file_name, text in files.items():
@@ -153,6 +178,9 @@ def parse_panic_evidence(files: dict[str, str]) -> EvidenceBundle:
     panic_event = _parse_panic_event(files.get("panic-context.xml", ""))
     if panic_event:
         summary.append(_summary_item("panic_event", panic_event))
+    panic_string = _panic_string_from_event(panic_event) or _panic_string_from_logs(files)
+    if panic_string:
+        summary.append(_summary_item("panic_string", panic_string))
 
     files_used = [{"file": name, "purpose": "panic evidence"} for name in files]
     return EvidenceBundle(summary=summary, files_used=files_used, raw_refs=_log_refs(files))

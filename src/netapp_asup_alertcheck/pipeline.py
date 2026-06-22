@@ -9,7 +9,7 @@ from .ai import build_messages, call_openai_compatible
 from .archive import ArchiveReader
 from .classifier import classify_message
 from .kb import build_kb_queries
-from .models import AnalysisResult, EmailMessageInput, EvidenceBundle, OutputEnvelope
+from .models import AnalysisResult, EmailMessageInput, EvidenceBundle, KBQueryRule, OutputEnvelope
 from .parsers.arw import parse_arw_evidence
 from .parsers.panic import parse_panic_evidence
 from .registry import RuleRegistry, load_registry_from_dir, load_registry_from_urls
@@ -64,6 +64,10 @@ def _evidence_context(evidence: EvidenceBundle) -> dict[str, object]:
         if isinstance(name, str) and isinstance(value, (str, int, float, bool)):
             context[name] = value
     return context
+
+
+def _applicable_kb_rules(rules: list[KBQueryRule], context: dict[str, object]) -> list[KBQueryRule]:
+    return [rule for rule in rules if rule.condition != "panic_string" or "panic_string" in context]
 
 
 def run_manual(
@@ -123,10 +127,10 @@ def run_manual(
     else:
         warnings.append("AI finalizer skipped because AI_PROVIDER_API_KEY or AI_PROVIDER_MODEL is missing")
 
-    kb_rules = registry.kb_queries.get(classification.matched_rule_id, [])
     kb_context = _evidence_context(evidence)
     if matched_rule and matched_rule.header_trigger:
         kb_context["header_trigger"] = matched_rule.header_trigger
+    kb_rules = _applicable_kb_rules(registry.kb_queries.get(classification.matched_rule_id, []), kb_context)
     kb_queries = build_kb_queries(kb_rules, kb_context)
 
     envelope = OutputEnvelope(

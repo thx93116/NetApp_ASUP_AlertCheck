@@ -82,14 +82,17 @@ API key 只放 runtime env，不寫入程式碼或規則表。
 - 主旨包含：`CONTROLLER TAKEOVER COMPLETE PANIC`
 - parser：`panic`
 - 優先讀取：`X-HEADER-DATA.TXT`、`coredump-status.xml`、`panic-context.xml`、`EMS-LOG-FILE.gz`、`messages.log.gz`
+- 若 evidence 有 `panic_string`，會額外產生 `NetApp ONTAP panic {panic_string}` KB query
 - `node_panic_partner_reboot`
 - 主旨包含：`PARTNER REBOOT (CONTROLLER TAKEOVER ON PANIC)`
 - parser：`panic`
 - 優先讀取：`X-HEADER-DATA.TXT`、`coredump-status.xml`、`panic-context.xml`、`EMS-LOG-FILE.gz`、`messages.log.gz`
+- 若 evidence 有 `panic_string`，會額外產生 `NetApp ONTAP panic {panic_string}` KB query
 - `node_reboot_power_on`
 - 主旨包含：`REBOOT (power on)`
 - parser：`panic`
 - 優先讀取：`X-HEADER-DATA.TXT`、`coredump-status.xml`、`all_coredump.xml`、`EMS-LOG-FILE.gz`、`messages.log.gz`
+- 若 evidence 有 `panic_string`，會額外產生 `NetApp ONTAP panic {panic_string}` KB query
 
 ### 測試
 
@@ -161,6 +164,7 @@ Current seed rules:
 - `node_reboot_power_on`: subject contains `REBOOT (power on)`
 - parser: `panic`
 - evidence priority: `X-HEADER-DATA.TXT`, `coredump-status.xml`, `panic-context.xml` or `all_coredump.xml`, `EMS-LOG-FILE.gz`, `messages.log.gz`
+- if `panic_string` exists in evidence, extra KB query template is emitted: `NetApp ONTAP panic {panic_string}`
 
 ## Tests
 
