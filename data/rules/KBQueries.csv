@@ -5,3 +5,5 @@ node_panic_takeover_complete,ai_requests_kb,NetApp CONTROLLER TAKEOVER COMPLETE 
 node_panic_takeover_complete,low_confidence,NetApp ONTAP panic coredump takeover {model}
 node_panic_partner_reboot,ai_requests_kb,NetApp PARTNER REBOOT CONTROLLER TAKEOVER ON PANIC {ontap_version}
 node_panic_partner_reboot,low_confidence,NetApp ONTAP partner reboot takeover panic {model}
+node_reboot_power_on,ai_requests_kb,NetApp REBOOT power on {ontap_version}
+node_reboot_power_on,low_confidence,NetApp ONTAP reboot power on coredump {model}

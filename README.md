@@ -86,6 +86,10 @@ API key 只放 runtime env，不寫入程式碼或規則表。
 - 主旨包含：`PARTNER REBOOT (CONTROLLER TAKEOVER ON PANIC)`
 - parser：`panic`
 - 優先讀取：`X-HEADER-DATA.TXT`、`coredump-status.xml`、`panic-context.xml`、`EMS-LOG-FILE.gz`、`messages.log.gz`
+- `node_reboot_power_on`
+- 主旨包含：`REBOOT (power on)`
+- parser：`panic`
+- 優先讀取：`X-HEADER-DATA.TXT`、`coredump-status.xml`、`all_coredump.xml`、`EMS-LOG-FILE.gz`、`messages.log.gz`
 
 ### 測試
 
@@ -154,8 +158,9 @@ Current seed rules:
 - KB query templates: `NetApp {header_trigger}`, `NetApp ARW {attack_detected_by}`
 - `node_panic_takeover_complete`: subject contains `CONTROLLER TAKEOVER COMPLETE PANIC`
 - `node_panic_partner_reboot`: subject contains `PARTNER REBOOT (CONTROLLER TAKEOVER ON PANIC)`
+- `node_reboot_power_on`: subject contains `REBOOT (power on)`
 - parser: `panic`
-- evidence priority: `X-HEADER-DATA.TXT`, `coredump-status.xml`, `panic-context.xml`, `EMS-LOG-FILE.gz`, `messages.log.gz`
+- evidence priority: `X-HEADER-DATA.TXT`, `coredump-status.xml`, `panic-context.xml` or `all_coredump.xml`, `EMS-LOG-FILE.gz`, `messages.log.gz`
 
 ## Tests
 

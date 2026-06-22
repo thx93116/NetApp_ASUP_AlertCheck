@@ -214,6 +214,64 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(summary["coredump_state"], "saving")
         self.assertEqual(summary["panic_event"]["message_name"], "callhome.panic")
 
+    def test_run_manual_returns_power_on_reboot_evidence_without_ai_key(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rules = root / "rules"
+            rules.mkdir()
+            (rules / "Rules.csv").write_text(
+                "rule_id,enabled,priority,subject_contains,header_trigger,alert_type,parser,question_direction\n"
+                "node_reboot_power_on,TRUE,90,REBOOT (power on),,node_reboot,panic,Confirm node reboot power-on evidence\n",
+                encoding="utf-8",
+            )
+            (rules / "EvidenceFiles.csv").write_text(
+                "rule_id,file_glob,priority,purpose,patterns\n"
+                "node_reboot_power_on,X-HEADER-DATA.TXT,10,ASUP headers,\n"
+                "node_reboot_power_on,coredump-status.xml,20,Coredump status,\n"
+                "node_reboot_power_on,EMS-LOG-FILE.gz,30,EMS reboot and core events,\n",
+                encoding="utf-8",
+            )
+            (rules / "KBQueries.csv").write_text(
+                "rule_id,condition,query_template\n"
+                "node_reboot_power_on,ai_requests_kb,NetApp REBOOT power on {ontap_version}\n",
+                encoding="utf-8",
+            )
+            archive_path = root / "reboot.zip"
+            with zipfile.ZipFile(archive_path, "w") as archive:
+                archive.writestr(
+                    "X-HEADER-DATA.TXT",
+                    "X-Netapp-asup-hostname: nbt1-12\n"
+                    "X-Netapp-asup-partner-hostname: nbt1-11\n"
+                    "X-Netapp-asup-cluster-name: nbt1\n"
+                    "X-Netapp-asup-os-version: NetApp Release 9.16.1P11\n"
+                    "X-Netapp-asup-model-name: FAS9000\n",
+                )
+                archive.writestr(
+                    "coredump-status.xml",
+                    "<root><ROW><node>nbt1-12</node><state>saved</state>"
+                    "<corename>core.537420918</corename><coredump_type>spare</coredump_type></ROW></root>",
+                )
+                archive.writestr(
+                    "EMS-LOG-FILE.gz",
+                    "<coredump_save_completed_1 file=\"core.537420918\"/>\n"
+                    "<callhome_coredump_save_done_1 subject=\"COREDUMP SAVE COMPLETED\"/>\n",
+                )
+
+            result = run_manual(
+                subject="[外部] HA Group Notification from nbt1-12 (REBOOT (power on)) NOTICE",
+                attachment_path=archive_path,
+                registry_dir=rules,
+                ai_config={},
+            )
+
+        summary = {item["name"]: item["value"] for item in result["evidence"]["summary"]}
+        self.assertEqual(result["classification"]["matched_rule_id"], "node_reboot_power_on")
+        self.assertEqual(result["classification"]["alert_type"], "node_reboot")
+        self.assertEqual(result["classification"]["parser"], "panic")
+        self.assertEqual(summary["node"], "nbt1-12")
+        self.assertEqual(summary["partner_node"], "nbt1-11")
+        self.assertEqual(summary["coredump_state"], "saved")
+
 
 if __name__ == "__main__":
     unittest.main()

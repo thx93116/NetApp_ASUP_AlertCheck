@@ -14,3 +14,8 @@ node_panic_partner_reboot,coredump-status.xml,20,Coredump status,
 node_panic_partner_reboot,panic-context.xml,30,Panic context and stack/EMS context,"panic,takeover,failover,reboot,coredump"
 node_panic_partner_reboot,EMS-LOG-FILE.gz,40,EMS panic and takeover events,"panic,takeover,failover,reboot,coredump"
 node_panic_partner_reboot,messages.log.gz,50,System log excerpts,"panic,takeover,failover,reboot,coredump"
+node_reboot_power_on,X-HEADER-DATA.TXT,10,AutoSupport metadata,
+node_reboot_power_on,coredump-status.xml,20,Coredump status,
+node_reboot_power_on,all_coredump.xml,30,All coredump records,"reboot,power,coredump,core"
+node_reboot_power_on,EMS-LOG-FILE.gz,40,EMS reboot and coredump events,"reboot,power,coredump,core"
+node_reboot_power_on,messages.log.gz,50,System log excerpts,"reboot,power,coredump,core"
